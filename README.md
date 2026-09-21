@@ -153,7 +153,7 @@ pytest tests/ -v
 Launch the unified FastAPI backend and static web client:
 
 ```bash
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Open your browser and navigate to:
