@@ -1,0 +1,3 @@
+threshold_method,threshold,TP,TN,FP,FN,accuracy,precision,recall,specificity,f1
+F1-selected threshold,0.77,91,1252,93,44,0.9074,0.4946,0.6741,0.9309,0.5705
+Youden-J-selected threshold,0.48,115,1153,192,20,0.8568,0.3746,0.8519,0.8572,0.5204

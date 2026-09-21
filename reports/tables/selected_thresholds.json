@@ -1,0 +1,9 @@
+{
+    "model": "logistic_regression",
+    "threshold_selection_method": "out_of_fold_training_predictions",
+    "cv_folds": 5,
+    "grouping_variable": "primary_artist",
+    "f1_threshold": 0.77,
+    "youden_j_threshold": 0.48,
+    "selection_data": "training_only"
+}

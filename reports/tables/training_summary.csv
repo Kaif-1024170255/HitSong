@@ -1,9 +1,9 @@
-model_name,best_hyperparameters,best_cv_roc_auc_mean,best_cv_roc_auc_std,training_time_sec
-logistic_regression,{'model__C': 10.0},0.9522362381819685,0.005276628117277847,5.10862700000871
-svm_rbf,"{'model__C': 1.0, 'model__gamma': 0.1}",0.9511107672203309,0.0055317500718613,49.973412599996664
-svm_linear,{'model__C': 1.0},0.9498436421826073,0.008924805681614613,20.661616900004447
-random_forest,"{'model__max_depth': None, 'model__max_features': 'log2'}",0.9473349750100677,0.006380330494629626,50.39859450003132
-knn,{'model__n_neighbors': 15},0.9052984248838083,0.007595922794830543,8.53295949997846
-naive_bayes,{'model__var_smoothing': 1e-07},0.8947408574064915,0.005819122159420433,0.364859199966304
-tree_entropy,"{'model__max_depth': 8, 'model__min_samples_leaf': 10}",0.8611617948270469,0.01112470980111582,1.9032782000140287
-tree_gini,"{'model__max_depth': 12, 'model__min_samples_leaf': 20}",0.8559565820213256,0.02015719970544096,1.9769107000320219
+model,best_cv_roc_auc,cv_std,fit_time_seconds,cv_folds,group_aware_cv,best_params
+logistic_regression,0.9468956702752495,0.008554954031138266,6.103947199997492,5,True,{'model__C': 1.0}
+svm_rbf,0.9463348205020266,0.007975637199704885,72.1169160999707,5,True,"{'model__C': 10.0, 'model__gamma': 'auto'}"
+svm_linear,0.944711633895863,0.008519263532061923,36.64271490002284,5,True,{'model__C': 1.0}
+random_forest,0.9423704627292719,0.009881324369941597,46.67214870004682,5,True,"{'model__max_depth': None, 'model__max_features': 'log2'}"
+knn,0.8949698761901885,0.013264065707450234,10.026265699998476,5,True,{'model__n_neighbors': 15}
+naive_bayes,0.8932736909761994,0.011589779777881481,1.5899641999858432,5,True,{'model__var_smoothing': 1e-07}
+tree_gini,0.8584978728917037,0.027126710528493733,2.772788300004322,5,True,"{'model__max_depth': 12, 'model__min_samples_leaf': 20}"
+tree_entropy,0.8502796083912327,0.0265568570663964,2.863062800024636,5,True,"{'model__max_depth': 8, 'model__min_samples_leaf': 20}"

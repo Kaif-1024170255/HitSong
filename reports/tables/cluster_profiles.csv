@@ -1,0 +1,5 @@
+cluster,cluster_name,size,pct_of_dataset,charted_rate,tempo,energy,danceability,valence,loudness,acousticness,instrumentalness,speechiness,duration_sec,genre_composition
+0,Upbeat Danceable / Pop,3348,45.2,0.1392,120.171,0.705,0.672,0.658,-6.546,0.255,0.037,0.077,210.575,"dance (107), country (77), salsa (76), pagode (72)"
+1,Acoustic / Downtempo / Ambient,1492,20.2,0.0194,109.214,0.282,0.457,0.283,-14.628,0.774,0.333,0.052,210.478,"romance (69), sleep (63), new-age (62), tango (60)"
+2,Intense / Fast / Rock & Metal,2315,31.3,0.0683,132.689,0.797,0.483,0.304,-6.348,0.081,0.275,0.076,268.96,"grindcore (96), black-metal (79), hardstyle (75), heavy-metal (65)"
+3,High-Speechiness / Spoken Word,248,3.3,0.0806,114.676,0.628,0.636,0.487,-9.33,0.494,0.03,0.568,194.795,"comedy (76), j-dance (15), hardcore (12), french (10)"

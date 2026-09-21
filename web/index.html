@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hit Song Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-container">
+
+    <!-- Masthead -->
+    <header class="masthead">
+      <div class="masthead-main">
+        <div class="masthead-title-group">
+          <h1 class="masthead-title">Hit Song Predictor</h1>
+          <p class="masthead-desc">Move the sliders to see a song's chance of charting.</p>
+        </div>
+        <div class="masthead-status" id="model-status" aria-live="polite">
+          <span class="status-dot" id="status-dot"></span>
+          <span class="status-text" id="status-text">connecting...</span>
+        </div>
+      </div>
+
+      <!-- Staff Rule 1 (Divider beneath masthead) -->
+      <svg class="staff-rule" width="100%" height="29" viewBox="0 0 1000 29" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1="0.5" x2="1000" y2="0.5" stroke="currentColor" stroke-width="1" />
+        <line x1="0" y1="7.5" x2="1000" y2="7.5" stroke="currentColor" stroke-width="1" />
+        <line x1="0" y1="14.5" x2="1000" y2="14.5" stroke="currentColor" stroke-width="1" />
+        <line x1="0" y1="21.5" x2="1000" y2="21.5" stroke="currentColor" stroke-width="1" />
+        <line x1="0" y1="28.5" x2="1000" y2="28.5" stroke="currentColor" stroke-width="1" />
+      </svg>
+    </header>
+
+    <!-- Main 12-Column Grid -->
+    <main class="content-grid">
+
+      <!-- Predictor Panel (7 Columns) -->
+      <section class="panel predictor-panel" aria-labelledby="heading-features">
+        <h2 id="heading-features" class="panel-heading">Song features</h2>
+
+        <!-- Dynamic Feature Sliders -->
+        <form id="predictor-form" class="controls-form" onsubmit="return false;">
+          <div id="sliders-container" class="sliders-container">
+            <!-- Skeleton loaders before schema arrives -->
+            <div class="skeleton-slider" aria-hidden="true"></div>
+            <div class="skeleton-slider" aria-hidden="true"></div>
+            <div class="skeleton-slider" aria-hidden="true"></div>
+            <div class="skeleton-slider" aria-hidden="true"></div>
+          </div>
+
+          <!-- Genre Select -->
+          <div class="control-group genre-group">
+            <label for="genre-select" class="control-label">Genre</label>
+            <div class="select-wrapper">
+              <select id="genre-select" name="genre" class="genre-select" aria-label="Song musical genre">
+                <option value="pop">pop</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Preset Examples -->
+          <div class="examples-group" role="group" aria-labelledby="examples-label">
+            <span id="examples-label" class="control-label">Load an example:</span>
+            <div class="examples-buttons">
+              <button type="button" class="btn-preset active" data-preset="pop" aria-pressed="true">Pop single</button>
+              <button type="button" class="btn-preset" data-preset="ballad" aria-pressed="false">Acoustic ballad</button>
+              <button type="button" class="btn-preset" data-preset="ambient" aria-pressed="false">Ambient instrumental</button>
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <!-- Result Panel (5 Columns, Sticky) -->
+      <aside class="panel result-panel" aria-labelledby="heading-prediction">
+        <h2 id="heading-prediction" class="panel-heading">Prediction</h2>
+
+        <div id="result-content" class="result-content" aria-live="polite" aria-atomic="true">
+          <!-- Probability Numeral -->
+          <div class="numeral-container">
+            <span id="prob-numeral" class="prob-numeral">—</span>
+          </div>
+
+          <!-- Verdict Line -->
+          <div class="verdict-container">
+            <p id="verdict-text" class="verdict-text">Calculating...</p>
+            <p id="verdict-caption" class="caption">Waiting on model response.</p>
+          </div>
+
+          <!-- Probability Meter -->
+          <div class="meter-wrapper" role="meter" aria-label="Probability of charting on Billboard Hot 100" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" id="aria-meter">
+            <div class="meter-track-container">
+              <!-- Brass Threshold Marker -->
+              <div class="threshold-marker" id="threshold-marker" style="left: 48%;">
+                <span class="threshold-triangle" aria-hidden="true">▼</span>
+                <span class="threshold-line" aria-hidden="true"></span>
+                <span class="threshold-label" id="threshold-label">threshold 0.48</span>
+              </div>
+
+              <!-- Meter Bar Track & Fill -->
+              <div class="meter-track">
+                <div class="meter-fill" id="meter-fill" style="width: 0%;"></div>
+                <div class="meter-knob" id="meter-knob" style="left: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="meter-labels">
+              <span class="caption">0</span>
+              <span class="caption">1</span>
+            </div>
+          </div>
+
+          <!-- Contributions Section -->
+          <div class="contributions-wrapper">
+            <h3 class="contributions-heading">What moved it</h3>
+            <div id="contributions-list" class="contributions-list">
+              <!-- Dynamically populated rows -->
+            </div>
+            <p class="caption contributions-caption">Relative pull on this prediction, not a general ranking.</p>
+          </div>
+        </div>
+
+        <!-- Error State (Hidden by default) -->
+        <div id="result-error" class="result-error" style="display: none;">
+          <p class="error-instructions">The model isn't responding. Start the server with <code>uvicorn app.main:app --reload</code> and reload this page.</p>
+        </div>
+      </aside>
+
+    </main>
+
+    <!-- Barline Separator -->
+    <div class="barline-divider" aria-hidden="true"></div>
+
+    <!-- Insights Section: Model Comparison Table -->
+    <section class="insights-section" aria-labelledby="heading-comparison">
+      <div class="section-header">
+        <h2 id="heading-comparison" class="section-heading">Model comparison</h2>
+        <p class="caption">Held-out test set performance across evaluated classifiers under artist-grouped evaluation.</p>
+      </div>
+      <div class="table-container">
+        <table id="model-comparison-table" class="comparison-table">
+          <thead>
+            <tr>
+              <th scope="col">Model</th>
+              <th scope="col" class="num-col">ROC-AUC</th>
+              <th scope="col" class="num-col">PR-AUC</th>
+              <th scope="col" class="num-col">Recall</th>
+              <th scope="col" class="num-col">Specificity</th>
+              <th scope="col" class="num-col">Accuracy</th>
+              <th scope="col" class="num-col">F1-Score</th>
+            </tr>
+          </thead>
+          <tbody id="comparison-tbody">
+            <tr>
+              <td colspan="7" class="caption">Loading benchmark records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Barline Separator -->
+    <div class="barline-divider" aria-hidden="true"></div>
+
+    <!-- Insights Section: Feature Importance -->
+    <section class="insights-section" aria-labelledby="heading-importance">
+      <div class="section-header">
+        <h2 id="heading-importance" class="section-heading">What predicts a hit</h2>
+        <p class="caption">Comparison of Random Forest impurity-based feature importances against test-set permutation importance.</p>
+      </div>
+      <div class="figure-container">
+        <img src="/reports/figures/feature_importance_rf.png" alt="Feature importance comparison showing Random Forest impurity importance alongside permutation importance on the held-out test set" class="insights-figure" loading="lazy">
+        <p class="caption figure-caption">Standardized audio features and aggregated genre importance. Permutation importance tests feature shuffling impact on held-out test ROC-AUC.</p>
+      </div>
+    </section>
+
+    <!-- Staff Rule 2 (Divider above footer) -->
+    <svg class="staff-rule" width="100%" height="29" viewBox="0 0 1000 29" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="0" y1="0.5" x2="1000" y2="0.5" stroke="currentColor" stroke-width="1" />
+      <line x1="0" y1="7.5" x2="1000" y2="7.5" stroke="currentColor" stroke-width="1" />
+      <line x1="0" y1="14.5" x2="1000" y2="14.5" stroke="currentColor" stroke-width="1" />
+      <line x1="0" y1="21.5" x2="1000" y2="21.5" stroke="currentColor" stroke-width="1" />
+      <line x1="0" y1="28.5" x2="1000" y2="28.5" stroke="currentColor" stroke-width="1" />
+    </svg>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p class="caption footer-text">Trained on 7,403 songs · Billboard Hot 100 2000–2023 · Evaluated on unseen artists (zero artist leakage) · Not investment advice for your record label.</p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

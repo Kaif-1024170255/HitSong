@@ -1,0 +1,42 @@
+[
+  {
+    "feature": "genre",
+    "importance": 0.1345,
+    "std": 0.01
+  },
+  {
+    "feature": "loudness",
+    "importance": 0.0267,
+    "std": 0.0069
+  },
+  {
+    "feature": "instrumentalness",
+    "importance": 0.0238,
+    "std": 0.0085
+  },
+  {
+    "feature": "duration_sec",
+    "importance": 0.0151,
+    "std": 0.0026
+  },
+  {
+    "feature": "acousticness",
+    "importance": 0.0147,
+    "std": 0.0059
+  },
+  {
+    "feature": "danceability",
+    "importance": 0.0052,
+    "std": 0.0052
+  },
+  {
+    "feature": "energy",
+    "importance": 0.0019,
+    "std": 0.0038
+  },
+  {
+    "feature": "valence",
+    "importance": 0.0012,
+    "std": 0.003
+  }
+]
