@@ -1,0 +1,9 @@
+model,best_params
+logistic_regression,{'model__C': 10.0}
+svm_rbf,"{'model__C': 1.0, 'model__gamma': 0.1}"
+svm_linear,{'model__C': 1.0}
+random_forest,"{'model__max_depth': None, 'model__max_features': 'log2'}"
+knn,{'model__n_neighbors': 15}
+naive_bayes,{'model__var_smoothing': 1e-07}
+tree_entropy,"{'model__max_depth': 8, 'model__min_samples_leaf': 10}"
+tree_gini,"{'model__max_depth': 12, 'model__min_samples_leaf': 20}"

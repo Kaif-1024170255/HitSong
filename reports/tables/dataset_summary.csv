@@ -1,0 +1,2 @@
+target_definition,ambiguous_excluded_rows,pre_downsample_total,pre_downsample_positives,pre_downsample_negatives,post_downsample_total,post_downsample_positives,post_downsample_negatives,class_ratio_positive,class_ratio_negative
+"the track appeared in the Billboard Year-End Hot 100, 2000-2023",11,80237,673,79564,7403,673,6730,0.09090909090909091,0.9090909090909091
