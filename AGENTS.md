@@ -27,3 +27,23 @@ HARD RULES:
 6. When something is ambiguous (which column is the label, which dataset to use, what
    counts as a duplicate), STOP and ask me. Do not pick a default and continue silently.
 7. Keep functions under 40 lines. No notebook logic that isn't also in src/.
+
+---
+
+SCOPE: add "upload an MP3 -> estimate features -> existing pipeline -> prediction". Nothing else.
+ADDITIVE ONLY: new files/modules, minimal hooks in existing code. Never edit or retrain the
+existing trained model, scaler or training scripts. Estimated features must go through the
+same saved preprocessing and model the current predictor already uses.
+FEATURE FLAG: everything is gated by ENABLE_AUDIO_UPLOAD (default false). With it false the
+app must behave exactly as before.
+THEME LOCK: reuse the existing CSS variables, fonts, spacing and components. No new colors,
+fonts, icon sets or UI libraries. Add only the upload block and its states.
+FREE ONLY: open-source libraries running locally. No paid or cloud audio APIs. Uploaded audio
+is processed in a temp file and deleted, never stored.
+HONESTY: never present estimated features as Spotify's values. Never change thresholds after
+seeing results in order to force a pass.
+DEFINITION OF DONE: tests pass AND you opened the screen in a running browser and used it.
+ASK ME WHEN: an install fails, column names are ambiguous, a threshold needs deciding, or you
+need audio files only I have. Stop and say exactly what you need.
+
+---
