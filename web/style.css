@@ -750,3 +750,128 @@ h1, h2, h3 {
     grid-template-columns: 75px 1fr 40px;
   }
 }
+
+/* Audio Upload Block (ENABLE_AUDIO_UPLOAD) */
+.upload-block {
+  border: 1px dashed var(--rule);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: var(--card);
+}
+
+.upload-title {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0 0 8px;
+  display: block;
+}
+
+.drop-zone {
+  display: block;
+  position: relative;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--paper);
+  transition: border-color 0.12s ease;
+}
+
+.drop-zone:hover,
+.drop-zone.over {
+  border-color: var(--indigo);
+}
+
+.drop-zone input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+.drop-zone:focus-within {
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.drop-main {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.drop-sub {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  margin-top: 2px;
+}
+
+.upload-status {
+  font-size: 0.8125rem;
+  color: var(--ink-2);
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+
+.upload-status.ok {
+  color: var(--indigo);
+}
+
+.upload-status.err {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.upload-disclaimer {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ink-2);
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  background-color: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+}
+
+.upload-disclaimer .disclaimer-badge {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 1px 4px;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+.tag {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-left: 8px;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.tag.est {
+  color: var(--indigo);
+  border-color: var(--indigo);
+}
+
+.tag.man {
+  color: var(--ink-2);
+  border-color: var(--rule);
+}

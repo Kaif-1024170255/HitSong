@@ -4,9 +4,10 @@ from contextlib import asynccontextmanager
 import json
 import os
 from pathlib import Path
+import tempfile
 from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,6 +17,12 @@ import pandas as pd
 from pydantic import BaseModel, field_validator
 
 from src.preprocess import ALL_MODEL_FEATURES
+from src.audio_extractor import extract_audio_features
+
+
+def is_audio_upload_enabled() -> bool:
+    """Return whether the audio upload feature flag is activated."""
+    return os.getenv("ENABLE_AUDIO_UPLOAD", "false").lower() in ("true", "1", "yes")
 
 
 def load_metadata(path: str = "models/final/metadata.json") -> dict[str, Any]:
@@ -173,7 +180,52 @@ def get_schema():
         "genres": meta.get("genre_categories", []),
         "genre_categories": meta.get("genre_categories", []),
         "threshold": meta.get("chosen_threshold", 0.48),
+        "enable_audio_upload": is_audio_upload_enabled(),
     }
+
+
+def save_upload_to_temp(file: UploadFile) -> str:
+    """Validate MP3 format and write upload contents to a temporary file."""
+    filename = file.filename or ""
+    if not filename.lower().endswith(".mp3"):
+        raise HTTPException(status_code=400, detail="Only MP3 files are supported.")
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+        content = file.file.read()
+        if len(content) == 0:
+            raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+        if len(content) > 20 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File exceeds 20MB limit.")
+        tmp.write(content)
+        return tmp.name
+
+
+@app.post("/api/extract")
+@app.post("/api/estimate-audio")
+def extract_audio_endpoint(file: UploadFile = File(...)):
+    """Extract Tier 1 audio features and proxies from an uploaded MP3."""
+    if not is_audio_upload_enabled():
+        raise HTTPException(
+            status_code=403,
+            detail="Audio upload feature is disabled. Set ENABLE_AUDIO_UPLOAD=true to enable.",
+        )
+    tmp_path = save_upload_to_temp(file)
+    try:
+        estimates = extract_audio_features(tmp_path, BOUNDS)
+        return {
+            "status": "ok",
+            "filename": file.filename,
+            "estimates": estimates,
+            "manual_features": [
+                "valence", "acousticness", "instrumentalness", "speechiness", "genre"
+            ],
+        }
+    except ValueError as val_err:
+        raise HTTPException(status_code=400, detail=str(val_err))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Audio extraction failed: {exc}")
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 
 @app.get("/api/insights")
@@ -192,7 +244,9 @@ def get_insights():
 @app.post("/api/predict")
 def predict_hit(song: SongFeatures):
     """Predict Billboard Hot 100 charting probability and feature contributions."""
-    pipe = app.state.model
+    pipe = getattr(app.state, "model", None)
+    if pipe is None:
+        pipe = joblib.load("models/final/model.joblib")
     meta = getattr(app.state, "metadata", METADATA)
     th = float(meta.get("chosen_threshold", 0.48))
     ordered_feats = meta.get("exact_ordered_feature_list", ALL_MODEL_FEATURES)

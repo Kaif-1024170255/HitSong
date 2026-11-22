@@ -18,6 +18,8 @@ venv.bak/
 # Data
 data/raw/
 data/processed/
+data/test_audio/
+scratch/
 
 # Models
 models/

@@ -157,6 +157,12 @@
       label.className = 'control-label';
       label.textContent = meta.label;
 
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'tag';
+      tagSpan.id = `tag-${feat}`;
+      tagSpan.hidden = true;
+      label.appendChild(tagSpan);
+
       const valSpan = document.createElement('span');
       valSpan.id = `val-${feat}`;
       valSpan.className = 'slider-val';
@@ -185,6 +191,10 @@
         valSpan.textContent = `${formatVal(feat, input.value)}${meta.unit}`;
         input.setAttribute('aria-valuetext', `${formatVal(feat, input.value)}${meta.unit}`);
         updateSliderFill(input);
+        if (tagSpan && !tagSpan.hidden && tagSpan.classList.contains('est')) {
+          tagSpan.textContent = 'Manual';
+          tagSpan.className = 'tag man';
+        }
         clearActivePreset();
         schedulePrediction();
       });
@@ -423,6 +433,10 @@
     const p = PRESETS[key];
     if (!p) return;
 
+    document.querySelectorAll('.tag').forEach(t => {
+      t.hidden = true;
+    });
+
     presetButtons.forEach(btn => {
       const match = btn.dataset.preset === key;
       btn.classList.toggle('active', match);
@@ -493,6 +507,114 @@
     });
   }
 
+  /** Configure audio upload drop zone and handler */
+  function setupAudioUpload() {
+    const uploadBlock = document.getElementById('upload-block');
+    const dropZone = document.getElementById('drop-zone');
+    const mp3Input = document.getElementById('mp3-input');
+    const uploadStatus = document.getElementById('upload-status');
+
+    if (!uploadBlock || !dropZone || !mp3Input || !uploadStatus) return;
+
+    function handleFile(file) {
+      if (!file) return;
+
+      if (!file.name.toLowerCase().endsWith('.mp3')) {
+        uploadStatus.hidden = false;
+        uploadStatus.className = 'upload-status err';
+        uploadStatus.textContent = 'Please choose a valid .mp3 file.';
+        return;
+      }
+
+      if (file.size > 20 * 1024 * 1024) {
+        uploadStatus.hidden = false;
+        uploadStatus.className = 'upload-status err';
+        uploadStatus.textContent = 'File exceeds the 20 MB limit.';
+        return;
+      }
+
+      uploadStatus.hidden = false;
+      uploadStatus.className = 'upload-status';
+      uploadStatus.textContent = 'Analysing audio (extracting Tier 1 features)...';
+      dropZone.style.pointerEvents = 'none';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      fetch('/api/extract', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(async res => {
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || 'Audio analysis failed.');
+          }
+          return res.json();
+        })
+        .then(data => {
+          uploadStatus.className = 'upload-status ok';
+          uploadStatus.textContent = `${data.filename || file.name} · 5 features estimated · genre & other features left manual`;
+
+          const estimates = data.estimates || {};
+          Object.keys(estimates).forEach(feat => {
+            const est = estimates[feat];
+            const inp = document.getElementById(`slider-${feat}`);
+            const valSpan = document.getElementById(`val-${feat}`);
+            const tagSpan = document.getElementById(`tag-${feat}`);
+            const meta = FEATURE_METADATA[feat] || { unit: '' };
+
+            if (inp && valSpan) {
+              inp.value = est.value;
+              valSpan.textContent = `${formatVal(feat, est.value)}${meta.unit}`;
+              inp.setAttribute('aria-valuetext', `${formatVal(feat, est.value)}${meta.unit}`);
+              updateSliderFill(inp);
+            }
+            if (tagSpan) {
+              tagSpan.hidden = false;
+              tagSpan.className = 'tag est';
+              tagSpan.textContent = est.clamped ? 'Estimated (clamped)' : 'Estimated';
+              tagSpan.title = est.clamped ? `Clamped to training bound (${est.raw_value} -> ${est.value})` : est.description || '';
+            }
+          });
+
+          clearActivePreset();
+          fetchPrediction(getPayload());
+        })
+        .catch(err => {
+          uploadStatus.className = 'upload-status err';
+          uploadStatus.textContent = err.message || 'Audio analysis failed.';
+        })
+        .finally(() => {
+          dropZone.style.pointerEvents = '';
+          mp3Input.value = '';
+        });
+    }
+
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('over');
+    });
+
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('over');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    mp3Input.addEventListener('change', () => {
+      if (mp3Input.files && mp3Input.files[0]) {
+        handleFile(mp3Input.files[0]);
+      }
+    });
+  }
+
   /** Initialize application */
   async function init() {
     await checkHealth();
@@ -513,6 +635,12 @@
 
       buildSliders(schema.sliders || {}, PRESETS.pop);
       populateGenres(schema.genres || [], PRESETS.pop.genre);
+
+      if (schema.enable_audio_upload) {
+        const upBlock = document.getElementById('upload-block');
+        if (upBlock) upBlock.hidden = false;
+        setupAudioUpload();
+      }
 
       // Trigger initial prediction
       fetchPrediction(getPayload());
