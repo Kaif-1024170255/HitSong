@@ -42,6 +42,21 @@
       <section class="panel predictor-panel" aria-labelledby="heading-features">
         <h2 id="heading-features" class="panel-heading">Song features</h2>
 
+        <!-- Audio Upload Block (Visible only when ENABLE_AUDIO_UPLOAD is true) -->
+        <div class="upload-block" id="upload-block" hidden>
+          <span class="upload-title">Upload a song</span>
+          <label class="drop-zone" id="drop-zone">
+            <input type="file" id="mp3-input" accept=".mp3,audio/mpeg" aria-label="Choose an MP3 file">
+            <span class="drop-main">Choose an MP3 file</span>
+            <span class="drop-sub">or drop it here &bull; up to 20 MB &bull; analysed locally, never stored</span>
+          </label>
+          <p class="upload-status" id="upload-status" aria-live="polite" hidden></p>
+          <p class="upload-disclaimer" id="upload-disclaimer">
+            <span class="disclaimer-badge">Experimental</span>
+            Audio-based feature estimation is experimental. Predictions using extracted features may be less accurate than predictions using Spotify-derived features. You can inspect and adjust any slider manually.
+          </p>
+        </div>
+
         <!-- Dynamic Feature Sliders -->
         <form id="predictor-form" class="controls-form" onsubmit="return false;">
           <div id="sliders-container" class="sliders-container">
