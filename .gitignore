@@ -21,9 +21,12 @@ data/processed/
 data/test_audio/
 scratch/
 
-# Models
-models/
+# Models (ignore intermediate models, keep final production bundle)
+models/*
+!models/final/
+!models/final/**
 *.joblib
+!models/final/model.joblib
 *.pkl
 
 # IDE / Editor
