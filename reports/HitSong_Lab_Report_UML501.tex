@@ -313,9 +313,9 @@ SVM & C, kernel (linear / RBF), gamma & Linear: $C = 1.0$, balanced; RBF: $C = 1
 
 \subsection*{8.7 Model Deployment}
 \begin{itemize}
-  \item \textbf{Technologies:} the preprocessing and model are saved together as one pipeline file (\texttt{models/final/model.joblib}) and served through the FastAPI/Vanilla JS app described above on a \textbf{local machine (Uvicorn ASGI server)}.
-  \item \textbf{Challenges:} (1) \textit{Consistency} -- preprocessing at prediction time must match training, solved by saving a single pipeline. (2) \textit{Scalability} -- the models are small and fast, so a single instance is enough for a demo; heavier traffic would need a proper API service and containers. (3) \textit{Security} -- inputs are validated for type and range via Pydantic (HTTP 422 on out-of-range inputs); the app stores no personal data.
-  \item \textbf{Monitoring and maintenance plan:} record the distribution of incoming features and of predicted probabilities and compare them with the training data to detect drift; retrain each year when new Year-End Hot 100 results become available; track precision, recall and F1 on newly labelled songs; and keep versions of every model so a faulty release can be rolled back.
+  \item \textbf{Technologies:} the preprocessing and model are saved together as one pipeline file (\texttt{models/final/model.joblib}) and served through the FastAPI/Vanilla JS app described above, deployed live on \textbf{Render} (\url{https://hitsong.onrender.com}) using the Uvicorn ASGI server on Python 3.12.8.
+  \item \textbf{Challenges:} (1) \textit{Consistency} -- preprocessing at prediction time must match training, solved by saving a single pipeline. (2) \textit{Environment parity} -- resolved Python/wheel dependency conflicts by pinning Python 3.12.8 (\texttt{.python-version}) and exact tested package versions (\texttt{requirements.txt}). (3) \textit{Scalability \& Security} -- stateless FastAPI inference runs within Render's 512~MB free tier (with heavy audio extraction gated behind \texttt{ENABLE\_AUDIO\_UPLOAD}); inputs are validated for type and range via Pydantic (HTTP 422 on out-of-range inputs) and no personal data is stored.
+  \item \textbf{Monitoring and maintenance plan:} monitor service health via \texttt{/api/health} and Render runtime logs; record the distribution of incoming features and predicted probabilities to detect drift; retrain each year when new Year-End Hot 100 results become available; track precision, recall and F1 on newly labelled songs; and keep versioned model artifacts in Git so a faulty release can be rolled back.
 \end{itemize}
 
 \section*{9. Results and Discussion}
@@ -415,7 +415,7 @@ The final model was chosen by weighing performance against interpretability, not
 \section*{10. Conclusion}
 This project showed that measurable audio features and genre contain useful but limited information about Billboard chart success. We met our objectives: all model configurations were compared fairly on one artist-disjoint, stratified split; the imbalance problem was handled with suitable metrics and sampling; feature importance identified genre, loudness and instrumentalness as the most influential inputs; and a threshold study showed how predictions can be tuned to business priorities.
 
-The final model reached $F_1 = 0.5204$, $\text{ROC-AUC} = 0.929$ (at deployed threshold $\tau = 0.48$) on unseen data and was deployed as a form-based FastAPI demo that returns a label and a probability. The key lesson is that for rare-event problems the headline accuracy is not the result; precision, recall and threshold choice are. The work also makes clear that audio features alone cannot fully explain success, because marketing, artist fame and timing play a large role.
+The final model reached $F_1 = 0.5204$, $\text{ROC-AUC} = 0.929$ (at deployed threshold $\tau = 0.48$) on unseen data and was deployed as a live FastAPI web application on Render (\url{https://hitsong.onrender.com}) that returns a label and a probability. The key lesson is that for rare-event problems the headline accuracy is not the result; precision, recall and threshold choice are. The work also makes clear that audio features alone cannot fully explain success, because marketing, artist fame and timing play a large role.
 
 \section*{11. Future Scope}
 \begin{itemize}
@@ -442,7 +442,7 @@ The final model reached $F_1 = 0.5204$, $\text{ROC-AUC} = 0.929$ (at deployed th
 \newpage
 \section*{13. Appendix}
 \subsection*{A. Source Code}
-GitHub repository: \url{https://github.com/Kaif-1024170255/HitSong}. All pipeline modules (\texttt{src/}), FastAPI app (\texttt{app/}), frontend (\texttt{web/}), and automated tests (\texttt{tests/}) are included.
+GitHub repository: \url{https://github.com/Kaif-1024170255/HitSong} | Live Deployment: \url{https://hitsong.onrender.com}. All pipeline modules (\texttt{src/}), FastAPI app (\texttt{app/}), frontend (\texttt{web/}), and automated tests (\texttt{tests/}) are included.
 
 \subsection*{B. Where Each Lab Report Question Is Answered}
 \begin{table}[H]
