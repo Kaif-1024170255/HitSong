@@ -269,12 +269,7 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 ### Experimental Audio Upload Mode
 ```bash
-# Windows (PowerShell):
-$env:ENABLE_AUDIO_UPLOAD="true"
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-
-# Linux / macOS:
-ENABLE_AUDIO_UPLOAD=true python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 Open your browser at:
@@ -284,15 +279,34 @@ http://127.0.0.1:8000
 
 ### API Endpoints
 - `GET /api/health`: Service health, model identification, and training timestamp.
-- `GET /api/schema`: Dynamically returns feature list, slider min/max/step/default bounds, 114 approved genres, and `enable_audio_upload` status.
-- `GET /api/insights`: Returns feature importances and model benchmark comparison records.
-- `POST /api/predict`: Validates payload against training boundaries and returns probability, binary label, operational threshold (`0.48`), and feature contributions.
-- `POST /api/extract`: Upload an MP3 (up to 20 MB) to extract duration, tempo, loudness, energy, and danceability. Gated by `ENABLE_AUDIO_UPLOAD`.
+- `GET /api/schema`: Dynamically returns feature list, slider min/max/step/default boundaries, and 114 approved genres.
+- `GET /api/insights`: Returns feature importances and model comparison benchmark records.
+- `POST /api/predict`: Validates payload against training boundaries and returns probability, binary label, operational threshold, and local feature contributions.
 
 ---
 
-## 13. System Boundaries & Ethical AI Principles
+## 7. Headline Benchmark Results
 
-- **Acoustic Potential, Not Commercial Destiny**: The model measures acoustic feature viability against historical commercial patterns. It cannot account for artist celebrity, record label marketing budgets, radio plugger campaigns, or viral TikTok trends.
-- **Statistical Correlation $\neq$ Causal Advice**: Positive coefficients (such as loudness) reflect empirical historical correlations, not a guarantee that boosting master volume will cause a song to chart.
-- **Honesty in Feature Estimation**: Open-source signal processing proxies are transparently labeled as estimates and are never presented as true Spotify features. Users retain manual control over all sliders.
+### Held-Out Test Set Performance (`reports/tables/model_comparison.csv`)
+Evaluated on 1,480 unseen songs (135 charted, 1,345 non-charted; 0 artist overlap with training data):
+
+| Rank | Model | ROC-AUC | PR-AUC | Recall | Specificity | Precision | Accuracy | F1-Score | TP | TN | FP | FN |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 1 | **Logistic Regression** | **0.929** | 0.606 | **0.844** | 0.862 | 0.380 | 0.860 | **0.524** | 114 | 1159 | 186 | 21 |
+| 2 | **SVM (RBF Kernel)** | 0.924 | 0.595 | 0.770 | 0.865 | 0.364 | 0.856 | 0.494 | 104 | 1163 | 182 | 31 |
+| 3 | **Linear SVM** | 0.924 | 0.602 | 0.793 | 0.852 | 0.350 | 0.847 | 0.485 | 107 | 1146 | 199 | 28 |
+| 4 | **Random Forest** | 0.918 | **0.619** | 0.296 | **0.993** | **0.816** | **0.930** | 0.435 | 40 | 1336 | 9 | 95 |
+| 5 | **K-Nearest Neighbors** | 0.877 | 0.509 | 0.370 | 0.987 | 0.735 | 0.930 | 0.493 | 50 | 1327 | 18 | 85 |
+| 6 | **Gaussian Naive Bayes** | 0.875 | 0.305 | 0.911 | 0.787 | 0.300 | 0.798 | 0.451 | 123 | 1058 | 287 | 12 |
+| 7 | **Decision Tree (Entropy)** | 0.821 | 0.443 | 0.341 | 0.989 | 0.754 | 0.930 | 0.469 | 46 | 1330 | 15 | 89 |
+| 8 | **Decision Tree (Gini)** | 0.821 | 0.513 | 0.363 | 0.982 | 0.671 | 0.926 | 0.471 | 49 | 1321 | 24 | 86 |
+
+### Leakage-Safe Operational Threshold Selection (`reports/tables/final_threshold_evaluation.csv`)
+Thresholds were derived strictly from 5-fold training out-of-fold predictions and evaluated once on the frozen held-out test set:
+
+| Threshold Method | Threshold | Accuracy | Precision | Recall | Specificity | F1-Score | TP | TN | FP | FN |
+|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Youden-J Selected (Deployment)** | **0.48** | 0.8568 | 0.3746 | **0.8519** | 0.8572 | 0.5204 | 115 | 1153 | 192 | 20 |
+| **F1-Max Selected** | **0.77** | **0.9074** | **0.4946** | 0.6741 | **0.9309** | **0.5705** | 91 | 1252 | 93 | 44 |
+
+- **Operational Selection**: The Youden's J threshold of `0.48` captures **85.2%** of all genuine chart hits (115/135) with **85.7%** specificity, directly serving the commercial priority of minimizing costly false negatives.
